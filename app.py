@@ -1,3 +1,4 @@
+from flask import Flask
 import ccxt
 import telebot
 
@@ -55,20 +56,23 @@ def find_arbitrage_opportunities():
 
     return arbitrage_opportunities
 
+# Create Flask app
+app = Flask(__name__)
+
 # Initialize the Telegram bot
 bot = telebot.TeleBot("7077125494:AAEfbQ6xjGvyz44aAy2fPVAS_yQFGgmwS44")
 
-@bot.message_handler(commands=['start'])
-def start(message):
+@app.route("/")
+def index():
     # Find arbitrage opportunities
     arbitrage_opportunities = find_arbitrage_opportunities()
 
-    # Send arbitrage opportunities to the user
+    # Return arbitrage opportunities as HTML
     if arbitrage_opportunities:
-        for opportunity in arbitrage_opportunities:
-            bot.send_message(message.chat.id, opportunity)
+        return "<br>".join(arbitrage_opportunities)
     else:
-        bot.send_message(message.chat.id, "No arbitrage opportunities found.")
+        return "No arbitrage opportunities found."
 
-# Start the bot
-bot.polling()
+# Start the Flask app
+if __name__ == "__main__":
+    app.run()
