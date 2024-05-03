@@ -7,30 +7,26 @@ TOKEN = "7077125494:AAEfbQ6xjGvyz44aAy2fPVAS_yQFGgmwS44"
 # Replace 'YOUR_CHAT_ID' with your actual chat ID
 chat_id = "6189017266"
 
-# Initialize Flask app
+# Initialize exchange objects
+exchange_api_keys = {
+    'mexc': {'apiKey': 'mx0vglsktbvhwLYb5D', 'secret': '07f99b1cafec47368b85c24290d969cb'},
+    'bingx': {'apiKey': '2BwZQAGVZ00Qhx5QUZmjld7pw0bae2mvrZwgodAUfdhHW4CWAQ5bMnbi50ym62n1GHxsKjFmjs00uhpqZkjWg', 'secret': 'nhBQ752uv9ksQf5q4H0GrBOidExUWLSR4nymxisBL0tw1QjPDmLnsHonxQ3olof4JlH4jAoib8OBCAhCkQ'},
+    'coinex': {'apiKey': '6E036A0906624D368A7D5AF59451D442', 'secret': '15D96BC28DD052F8A94E19CDFA312F784596688CFA85F220'}
+}
+
+# Initialize exchange objects
+exchanges = {}
+for exchange_name, api_keys in exchange_api_keys.items():
+    exchanges[exchange_name] = getattr(ccxt, exchange_name)({**api_keys})
+
 app = Flask(__name__)
 
-@app.route('/', methods=['POST'])
-def webhook():
-    data = request.json
-    message_text = data['message']['text']
-    if message_text == '/start':
-        send_opportunities()
-    return '', 200
+@app.route('/')
+def hello():
+    return 'Hello, World!'
 
-def send_opportunities():
-    # Initialize exchange objects
-    exchange_api_keys = {
-        'mexc': {'apiKey': 'mx0vglsktbvhwLYb5D', 'secret': '07f99b1cafec47368b85c24290d969cb'},
-        'bingx': {'apiKey': '2BwZQAGVZ00Qhx5QUZmjld7pw0bae2mvrZwgodAUfdhHW4CWAQ5bMnbi50ym62n1GHxsKjFmjs00uhpqZkjWg', 'secret': 'nhBQ752uv9ksQf5q4H0GrBOidExUWLSR4nymxisBL0tw1QjPDmLnsHonxQ3olof4JlH4jAoib8OBCAhCkQ'},
-        'coinex': {'apiKey': '6E036A0906624D368A7D5AF59451D442', 'secret': '15D96BC28DD052F8A94E19CDFA312F784596688CFA85F220'}
-    }
-
-    # Initialize exchange objects
-    exchanges = {}
-    for exchange_name, api_keys in exchange_api_keys.items():
-        exchanges[exchange_name] = getattr(ccxt, exchange_name)({**api_keys})
-
+@app.route('/start', methods=['POST'])
+def start():
     # Fetch all trading pairs available on each exchange
     exchange_markets = {}
     for exchange_name, exchange in exchanges.items():
@@ -70,5 +66,21 @@ def send_opportunities():
             url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_id}&text={message}"
             requests.get(url)
 
+    return 'OK'
+
 if __name__ == '__main__':
+    # Replace 'YOUR_BOT_TOKEN' with your actual bot token
+    bot_token = "7077125494:AAEfbQ6xjGvyz44aAy2fPVAS_yQFGgmwS44"
+    # Replace 'YOUR_WEBHOOK_URL' with the webhook URL provided by Render
+    webhook_url = "https://arbitrage-2smi.onrender.com"
+    
+    # Set the webhook URL for your bot
+    response = requests.post(f"https://api.telegram.org/bot{bot_token}/setWebhook?url={webhook_url}")
+
+    # Check the response from the Telegram Bot API
+    if response.ok:
+        print("Webhook URL has been set successfully.")
+    else:
+        print("Failed to set webhook URL:", response.text)
+    
     app.run(debug=True)
