@@ -82,5 +82,3 @@ if __name__ == '__main__':
         print("Webhook URL has been set successfully.")
     else:
         print("Failed to set webhook URL:", response.text)
-    
-    app.run(debug=True)
