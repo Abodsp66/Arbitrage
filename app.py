@@ -27,6 +27,10 @@ def hello():
 
 @app.route('/start', methods=['POST'])
 def start():
+    send_opportunities()
+    return 'OK'
+
+def send_opportunities():
     # Fetch all trading pairs available on each exchange
     exchange_markets = {}
     for exchange_name, exchange in exchanges.items():
@@ -66,19 +70,5 @@ def start():
             url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_id}&text={message}"
             requests.get(url)
 
-    return 'OK'
-
 if __name__ == '__main__':
-    # Replace 'YOUR_BOT_TOKEN' with your actual bot token
-    bot_token = "7077125494:AAEfbQ6xjGvyz44aAy2fPVAS_yQFGgmwS44"
-    # Replace 'YOUR_WEBHOOK_URL' with the webhook URL provided by Render
-    webhook_url = "https://arbitrage-2smi.onrender.com"
-    
-    # Set the webhook URL for your bot
-    response = requests.post(f"https://api.telegram.org/bot{bot_token}/setWebhook?url={webhook_url}")
-
-    # Check the response from the Telegram Bot API
-    if response.ok:
-        print("Webhook URL has been set successfully.")
-    else:
-        print("Failed to set webhook URL:", response.text)
+    app.run(debug=True)
